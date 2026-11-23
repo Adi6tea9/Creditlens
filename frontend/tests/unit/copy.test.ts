@@ -13,6 +13,7 @@ import { copy, fill, placeholderDefaults } from '../../src/content/copy';
 // Vitest runs with cwd = frontend/.
 const spec = readFileSync(resolve(process.cwd(), '../docs/FRONTEND_MASTER_SPEC.md'), 'utf8');
 const copySource = readFileSync(resolve(process.cwd(), 'src/content/copy.ts'), 'utf8');
+const projectSource = readFileSync(resolve(process.cwd(), 'src/config/project.ts'), 'utf8');
 
 // Section 7 only: from its heading up to the section 8 heading.
 const start = spec.indexOf('## 7.');
@@ -143,5 +144,40 @@ describe('spec sections 3-8 copy is verbatim (full string in spec)', () => {
   // normalized form — do not silently loosen the check.
   it.each(entries)('%s appears verbatim in spec sections 3-8', (_key, text) => {
     expect(sections3to8.includes(text)).toBe(true);
+  });
+});
+
+describe('meta failure copy', () => {
+  const failureCopy = 'Could not load the form options. Please refresh the page and try again.';
+
+  it('uses the owner-supplied sentence in copy.ts', () => {
+    expect(copy.score.metaFailure).toBe(failureCopy);
+  });
+
+  it('appears verbatim in the spec section 7 copy list', () => {
+    expect(section7.includes(`\`${failureCopy}\``)).toBe(true);
+  });
+});
+
+describe('no bracketed placeholders in copy or config', () => {
+  /** Only string literals: TS syntax, interpolations and comments are ignored. */
+  function stringLiterals(source: string): string[] {
+    return [
+      ...[...source.matchAll(/(['"])(.*?)\1/g)].map((match) => match[2]),
+      ...[...source.matchAll(/`([^`]*)`/g)].map((match) =>
+        match[1].replace(/\$\{[^}]*\}/g, ''),
+      ),
+    ];
+  }
+
+  // [UPPERCASE WORDS], [DEFINITION: ...], [REAL URL], <angle-bracket> templates.
+  const bracketedPlaceholder = /\[[A-Z][A-Z0-9 _:./+-]*\]|<[A-Za-z0-9_][^<>\n]*>/;
+
+  it.each([
+    ['copy.ts', copySource],
+    ['project.ts', projectSource],
+  ])('finds no bracketed placeholders in %s', (_file, source) => {
+    const hits = stringLiterals(source).filter((value) => bracketedPlaceholder.test(value));
+    expect(hits).toEqual([]);
   });
 });

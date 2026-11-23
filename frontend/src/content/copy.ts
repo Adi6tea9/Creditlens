@@ -152,7 +152,7 @@ export const copy = {
     estimating: "Estimating…",
     validationExample: "Enter a number of 0 or more.",
     submitError: "Could not get an estimate. Check the values and try again.",
-    metaFailure: "[FAILURE WORDING]",
+    metaFailure: "Could not load the form options. Please refresh the page and try again.",
   },
 
   // ---- 6.3 Result (7.4 points here) -------------------------------------

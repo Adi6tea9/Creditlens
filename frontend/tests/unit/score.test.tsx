@@ -18,6 +18,8 @@ vi.mock('../../src/api/client', () => ({
   useMock: mocks.useMock,
 }));
 
+const META_FAILURE = 'Could not load the form options. Please refresh the page and try again.';
+
 function LocationProbe() {
   const { pathname, state } = useLocation();
   return <div data-testid="location">{`${pathname}|${JSON.stringify(state)}`}</div>;
@@ -90,7 +92,8 @@ describe('Score form (spec 6.2)', () => {
     mocks.getMeta.mockRejectedValue(new Error('offline'));
     const { container } = await renderScore({ waitForField: false });
 
-    expect(screen.getByText(copy.score.metaFailure)).toBeInTheDocument();
+    expect(screen.getByText(META_FAILURE)).toBeInTheDocument();
+    expect(copy.score.metaFailure).toBe(META_FAILURE);
     expect(container.querySelector('form')).toBeNull();
     expect(screen.queryByLabelText('Loan type')).toBeNull();
   });

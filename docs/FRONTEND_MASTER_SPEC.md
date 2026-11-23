@@ -362,7 +362,7 @@ Plain card with `Page not found` and a link to `/`. Keep banner/header/footer.
 - `What you get back`: `An estimated chance of repayment difficulty` · `Whether the applicant counts as thin-file, and how that affects confidence` · `The inputs that pushed the estimate up or down`
 - `Good to know`: `Gender and age are not inputs to the model.` · `No applications from the training data are shown anywhere in this demo.` · `This is a research and portfolio project, not a lender's tool.`
 - Info note (while fields not final): `**Provisional fields.** The final input list follows the real feature set once the data has been inspected.`
-- Meta failure (shown instead of the form when /api/meta fails): `[FAILURE WORDING]`
+- Meta failure (shown instead of the form when /api/meta fails): `Could not load the form options. Please refresh the page and try again.`
 - Mock field list (also the `/meta` mock): Loan type (select) · Loan amount requested (placeholder `e.g. 250000`) · Monthly repayment (`e.g. 12000`) · Price of the goods being financed (`e.g. 225000`) · Annual income (`e.g. 180000`) · Years in current job (`e.g. 3`, decimal) · Months of credit-bureau history (`0 if none`) · Previous loans with this lender (`e.g. 1`) · Previous late payments (`e.g. 0`).
 
 ### 7.4 Result
