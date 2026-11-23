@@ -63,7 +63,7 @@ export default function Home() {
           <div className="flex flex-wrap items-center gap-3.5 pt-1">
             <Link
               to="/score"
-              className="inline-flex min-h-touch items-center justify-center rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:bg-primary-hover"
+              className="inline-flex min-h-touch items-center justify-center rounded-xl bg-primary-hover px-5 py-3 text-sm font-semibold text-white shadow-sm transition-all"
             >
               {copy.home.tryDemo}
             </Link>

@@ -9,7 +9,7 @@ export default function Footer() {
       <div className="mx-auto max-w-6xl px-4 py-5 text-xs leading-relaxed text-slate-500 sm:px-6 lg:px-8">
         {before}
         {REPO_URL.startsWith('http') ? (
-          <a href={REPO_URL} className="text-primary-text hover:underline">
+          <a href={REPO_URL} className="text-primary-text underline">
             {REPO_URL}
           </a>
         ) : (

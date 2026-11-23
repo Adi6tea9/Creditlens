@@ -70,18 +70,7 @@ test.describe('screenshot evidence: Home vs prototype', () => {
   }
 });
 
-/**
- * Known axe findings on this route, pending owner decisions:
- * - color-contrast: spec 4.1 mandates teal-600 #0D9488 + white 14px on the
- *   primary button (3.74:1); darkening it would deviate from the prototype.
- * - link-in-text-block: pre-existing footer link (spec 4.1 teal-700, underline
- *   only on hover) inside slate-500 text.
- * - region: pre-existing TopBanner role=note sits outside page landmarks.
- * Any NEW violation still fails this test.
- */
-const KNOWN_AXE_IDS = ['color-contrast', 'link-in-text-block', 'region'];
-
-test('axe: only documented violations on /', async ({ page }) => {
+test('axe: no violations on /', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto('/');
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
@@ -90,7 +79,17 @@ test('axe: only documented violations on /', async ({ page }) => {
     'tests/e2e/__screenshots__/home-axe-1280.json',
     JSON.stringify(results.violations, null, 2),
   );
-  expect(results.violations.map((violation) => violation.id).sort()).toEqual(
-    [...KNOWN_AXE_IDS].sort(),
+  expect(results.violations).toEqual([]);
+});
+
+test('axe: no violations on /score', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto('/score');
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+  const results = await new AxeBuilder({ page }).analyze();
+  writeFileSync(
+    'tests/e2e/__screenshots__/score-axe-1280.json',
+    JSON.stringify(results.violations, null, 2),
   );
+  expect(results.violations).toEqual([]);
 });

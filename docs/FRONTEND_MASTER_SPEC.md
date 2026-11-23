@@ -101,8 +101,8 @@ Extracted from `docs/ui/creditlens_credit_risk_research_demo.html`. Put them in 
 | `body` | slate-700 #334155 | Lists, labels |
 | `muted` | slate-600 #475569 | Descriptions, inactive nav |
 | `subtle` | slate-500 #64748B | Helper text, axis labels, `—` cells, placeholders |
-| `primary` | teal-600 #0D9488 | Primary button bg, Approve fills, "lowers risk" bars, approve slider thumb, focus outline |
-| `primary-hover` | teal-700 #0F766E | Primary button hover |
+| `primary` | teal-600 #0D9488 | Approve fills, "lowers risk" bars, approve slider thumb, focus outline |
+| `primary-hover` | teal-700 #0F766E | Primary button bg and hover (deliberate deviation from the prototype, see A1) |
 | `primary-text` | teal-700 #0F766E (hover teal-800 #115E59) | Links, active nav, Approve value labels |
 | `primary-tint` / `-border` | teal-50 #F0FDFA / teal-200 #99F6E4 | Eyebrow pill, Approve KPI tile, approve pill, mobile active item |
 | `amber` | amber-600 #D97706 | **Fills, dots, outlines only**: "raises risk" bars, Review outline |
@@ -119,6 +119,8 @@ Extracted from `docs/ui/creditlens_credit_risk_research_demo.html`. Put them in 
 | `input-border` | slate-300 #CBD5E1 | Inputs, selects, dashed upload box (see 12.1 gap A2) |
 | `error` | #B91C1C | Form validation only (added in this spec) |
 | `logo-from / via / to` | teal-500 #14B8A6 / teal-600 #0D9488 / indigo-800 #3730A3 | Logo tile gradient (`bg-gradient-to-br`) |
+
+**Deliberate §4.1 deviation (owner-approved, A1):** the primary button uses `primary-hover` teal-700 #0F766E for its normal background so white 14px text reaches 4.5:1. The prototype still shows teal-600; all other `primary` fills keep the prototype colour.
 
 Band pills (all `rounded-full px-2.5 py-0.5 text-xs font-semibold border`): Approve `bg-teal-50 text-teal-800 border-teal-200`; Review `bg-amber-100/90 text-amber-800 border-amber-200`; Reject `bg-rose-50 text-rose-800 border-rose-200`.
 Thin-file chip: `bg-amber-50 text-amber-800 border border-amber-300/90 rounded-full px-2.5 py-0.5 text-xs font-medium`.
@@ -496,7 +498,7 @@ When `/meta` supplies a real value it overrides the constant; the constant is on
 ### 12.1 Accessibility (WCAG 2.2 AA)
 - All text meets 4.5:1 on its background; non-text UI (bars, outlines, focus) meets 3:1. `amber` #D97706 is **never used as text on white** (use `amber-text` #B45309).
 - **Known gaps in the prototype's palette (owner decision; each is a one-token change):**
-  - **A1. White text on `primary` buttons** (#0D9488) is about 3.7:1 and fails 4.5:1 for 14px text. Fix: set button bg to `primary-hover` #0F766E (about 5.5:1). Default in this spec: use the prototype colour; flip the token if the owner approves.
+  - **A1. White text on `primary` buttons** (#0D9488) is about 3.7:1 and fails 4.5:1 for 14px text. **Resolved (owner-approved deviation from §4.1):** the app's primary button bg is now `primary-hover` #0F766E (about 5.5:1); the prototype file still shows teal-600. No other `primary` colour changed.
   - **A2. Input and select borders** (slate-300 #CBD5E1) are about 1.6:1 against white and fail the 3:1 non-text rule. Fix: `input-border` → #7B8794. Default: prototype colour.
   - Everything else the prototype showed as failing (placeholders, `—` cells, 11px text, the pale Review bars, missing focus rings) is already fixed in the prototype file.
 - Semantic landmarks (`header`, `nav`, `main`, `footer`), one H1 per page, headings in order.
