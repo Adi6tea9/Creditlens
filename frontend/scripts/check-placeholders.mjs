@@ -1,12 +1,15 @@
 #!/usr/bin/env node
 /**
  * Spec 12.4 — release check.
- * Greps src/ and built assets for the section 11 placeholders, and checks
- * production config for hard-coded mock labels. Exits non-zero if any remain.
+ * Greps src/ and built assets for the old section 11 placeholders, checks
+ * production config for hard-coded mock labels, and rejects empty or
+ * angle-bracketed config values. Exits non-zero if any finding remains.
  */
 
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
+
+import { invalidPlaceholderValues, readPlaceholderValues } from './placeholder-rules.mjs';
 
 const root = process.cwd();
 const srcDir = join(root, 'src');
@@ -65,6 +68,11 @@ for (const check of checks) {
       });
     }
   }
+}
+
+const configSource = readFileSync(join(configDir, 'project.ts'), 'utf8');
+for (const issue of invalidPlaceholderValues(readPlaceholderValues(configSource))) {
+  findings.push({ label: issue, location: 'src/config/project.ts' });
 }
 
 if (findings.length === 0) {

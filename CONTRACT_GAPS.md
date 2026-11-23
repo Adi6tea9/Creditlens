@@ -18,13 +18,17 @@ dependencies. "Run lint" is therefore unverified; typecheck (`tsc --noEmit`)
 and the full Vitest suite are the available static checks. Owner decision:
 approve adding a linter in a later task.
 
-## G4. Placeholder values still unknown (spec §11, by design)
+## G4. Placeholder values supplied; release check guards the rest (spec §11)
 
-- `REPO_URL` = `[YOUR REPO LINK]` — owner must supply the real URL (the
-  optional task item was a literal template, not a URL).
-- `THIN_FILE_DEFINITION` / `THIN_FILE_SHORT` — stay placeholders until the
-  owner provides text or `/meta` supplies it.
-- `npm run check:placeholders` exits 1 while these remain. Do not weaken it.
+- `REPO_URL` = `[REAL URL]` — the literal the owner supplied. It is non-empty
+  and has no angle brackets, so the check passes, but it is still not a
+  resolvable URL. Owner must replace it before release.
+- `THIN_FILE_DEFINITION` / `THIN_FILE_SHORT` — now hold the owner's text;
+  `/meta` still overrides them at runtime.
+- `npm run check:placeholders` still greps `src/` and built assets for the old
+  section 11 tokens and `is_sample` mock labels in production config, and now
+  also fails if any of the three config values is empty or contains `<` or `>`.
+  It exits 0 only when no finding remains. Do not weaken it.
 
 ## G5. fill() leaves unknown tokens untouched (proposal, not implemented)
 

@@ -203,7 +203,7 @@ Home uses `space-y-10`.
 **Layout note for all of section 6:** any `flex-basis`, pixel padding or radius numbers below came from an earlier mockup. Layout proportions, paddings, radii and colours come from the prototype and section 4 (grids and card styles in 4.3). The content, order, behaviour and copy in section 6 stay as written.
 
 1. **Hero** (flex-wrap, gap 32, items centred)
-   - Left (flex 1.3 1 480px): eyebrow pill `RESEARCH DEMO · CREDIT RISK` (4.2); H1 `Does a credit model work for people with no credit history?`; lead (max-width 600); buttons: primary `Try the demo` → `/score`, secondary `Read the model report` → `/report`.
+   - Left (flex 1.3 1 480px): eyebrow pill `Research demo · Credit risk` (4.2); H1 `Does a credit model work for people with no credit history?`; lead (max-width 600); buttons: primary `Try the demo` → `/score`, secondary `Read the model report` → `/report`.
    - Right (flex 1 1 360px) card padding 24: H2 `What you can do here` (16/24) then three link rows with a right chevron (`w-4 h-4 text-slate-400`; on hover teal-600 and `translate-x-0.5`), each a block link with top border 1px `border`, padding 14px 0 (last row padding-bottom 0): title (14/600 `primary`) + description (13/18 `muted`). Rows → `/score`, `/batch`, `/report`. Copy in 7.2.
 2. **How it works**: H2 then 4 cards (padding 24): a 32×32 numbered chip (per-step colour, 4.1) with the number, H3 title, 14/20 `muted` text. Steps: Train, Segment, Explain, Check.
 3. **What this is not**: warn-style card (`bg-amber-50/75 rounded-2xl border border-amber-200/90 p-6 sm:p-7`), H2 `text-lg font-bold`, list `list-disc pl-4 marker:text-amber-600`, a bullet list (14/20, gap 8) with a bold lead-in per item. 5 items, copy in 7.2.
@@ -474,16 +474,17 @@ F(x):       0  .150 .320 .480 .624  .714  .786  .838  .880 .910  .934  .954  .97
 ```
 At default cutoffs 10 / 20 this gives **624 approve / 256 review / 120 reject** out of 1,000. Use this as a unit-test fixture for `bandFor` + counts.
 
-## 11. Placeholders — unknown on purpose
+## 11. Placeholders — current values and remaining unknowns
 
-Put in `src/config/project.ts`. Each is a visible, greppable token. Do not guess them.
+Put in `src/config/project.ts` where noted. Three constants now hold owner-supplied
+values; the remaining entries are still provisional. Do not guess the rest.
 
-| Constant | Placeholder value | Becomes |
+| Constant | Current value | Becomes |
 |---|---|---|
-| `REPO_URL` | `[YOUR REPO LINK]` | Real repo URL (owner will supply) |
+| `REPO_URL` | `[REAL URL]` | Real repo URL (owner will supply) |
 | `PRODUCT_NAME` | `CreditLens` | Owner's chosen name. **Caveat:** "CreditLens" is also, to the best of our knowledge, the name of a commercial lending product from Moody's Analytics. The owner has decided to use it for this portfolio demo; the footer already says "Not affiliated" for Home Credit and Kaggle. Keep it a single constant so a rename is one line. |
-| `THIN_FILE_DEFINITION` | `[DEFINITION: set from bureau coverage before looking at outcomes]` | The real rule, from `/meta` |
-| `THIN_FILE_SHORT` | `[DEFINITION]` | Short clause for the Result card |
+| `THIN_FILE_DEFINITION` | `A thin-file borrower has little or no formal credit history, such as few or no past loans or bureau records, so traditional scores have little to go on.` | Rule text; `/meta` overrides |
+| `THIN_FILE_SHORT` | `Little or no credit history.` | Short clause for the Result card; `/meta` overrides |
 | Loan types | `Cash loan`, `Revolving loan` (provisional) | Real list from the data (not yet inspected) |
 | Input fields | the nine in 7.3 (provisional) | Real feature set |
 | Main metric copy | `ROC-AUC, to be confirmed` | Confirmed metric |
