@@ -9,6 +9,8 @@ interface DataTableProps {
   minWidthClass?: string;
   /** Column that identifies the row (spec 5 defaults to the first column). */
   rowHeaderIndex?: number;
+  /** Extra classes per body row, e.g. the shaded "All applicants" row. */
+  rowClassNames?: string[];
 }
 
 /**
@@ -22,6 +24,7 @@ export default function DataTable({
   caption,
   minWidthClass = 'min-w-full',
   rowHeaderIndex = 0,
+  rowClassNames,
 }: DataTableProps) {
   const cellAlign = (i: number) => (align?.[i] === 'right' ? 'text-right' : 'text-left');
   return (
@@ -43,7 +46,7 @@ export default function DataTable({
         </thead>
         <tbody className="divide-y divide-slate-100 bg-white">
           {rows.map((row, r) => (
-            <tr key={r} className="hover:bg-slate-50/70">
+            <tr key={r} className={`hover:bg-slate-50/70 ${rowClassNames?.[r] ?? ''}`}>
               {row.map((cell, c) =>
                 c === rowHeaderIndex ? (
                   <th
