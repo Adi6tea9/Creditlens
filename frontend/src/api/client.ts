@@ -9,7 +9,7 @@ import {
 import type { Batch, BatchError, Meta, Report, Score } from './schemas';
 
 /** Spec 10: mock on by default in dev, off in prod; explicit env value wins. */
-function useMock(): boolean {
+export function useMock(): boolean {
   const raw = import.meta.env.VITE_USE_MOCK;
   return raw === undefined ? import.meta.env.DEV : raw === 'true';
 }
@@ -34,7 +34,8 @@ async function request<T>(path: string, parser: Parser<T>, init?: RequestInit): 
 
   if (!response.ok) {
     if (response.status === 422 && path === '/score/batch') {
-      const parsed = batchErrorSchema.safeParse(await response.json());
+      const body = await response.json();
+      const parsed = batchErrorSchema.safeParse(body);
       throw new ApiError(
         'Could not score file.',
         422,
@@ -42,7 +43,14 @@ async function request<T>(path: string, parser: Parser<T>, init?: RequestInit): 
         parsed.success ? parsed.data.row_errors : undefined,
       );
     }
-    throw new ApiError(`Request failed (${response.status})`, response.status);
+    let detail: string | undefined;
+    try {
+      const body = (await response.json()) as { detail?: unknown };
+      if (typeof body.detail === 'string') detail = body.detail;
+    } catch {
+      // Non-JSON error bodies carry no detail.
+    }
+    throw new ApiError(`Request failed (${response.status})`, response.status, detail);
   }
 
   return parser.parse(await response.json());
