@@ -3,25 +3,13 @@
 Known conflicts and unknowns between the spec, the copy hardening rules, and
 the tooling. Each entry says what is blocked and who must decide.
 
-## G1. "confidence" wording conflict (owner decision needed)
+## G1. Forbidden-wording rule removed (owner ruling, resolved)
 
-- Hardening rule: no copy string may contain "confidence" in connection with
-  the range or prediction.
-- Spec §7.3 mandates verbatim: `Whether the applicant counts as thin-file, and
-  how that affects confidence` — stored at `copy.score.getBack[1]`.
-- The §7 verbatim test requires that exact string, so both rules cannot pass.
-- Resolution (owner-approved 2026-11-23): documented exception in
-  `frontend/tests/unit/copy.test.ts` (`documentedExceptions`, key
-  `score.getBack.1`). Wording NOT changed. Remove the exception only when the
-  spec itself changes.
-- No "80%" / "80 %" hits exist anywhere in copy.
-
-## G2. "dwell range" is not a concept in this spec
-
-The hardening task refers to a "dwell range"; the spec has no dwell concept
-(its range is the risk range, §6.3). The forbidden-wording check was applied
-to all copy strings, which is strictly broader. Owner should confirm the rule
-was meant for this project.
+The owner ruled that the spec's copy is the source of truth for CreditLens.
+The "80%"/"confidence" forbidden-wording rule came from a different project
+and does not apply here. The test was removed from
+`frontend/tests/unit/copy.test.ts`; no spec wording and no copy string was
+changed. G2 below was retired with it.
 
 ## G3. No lint tooling
 

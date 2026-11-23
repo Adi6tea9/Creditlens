@@ -82,7 +82,7 @@ describe('placeholders are filled, never retyped', () => {
   });
 });
 
-// ---- Hardening: token safety, §6/§8 verbatim, forbidden wording ----------
+// ---- Hardening: token safety and spec §3-§8 verbatim copy ------------------
 
 /** Every leaf string in copy, with its dot path (e.g. score.getBack.1). */
 function stringEntries(value: unknown, prefix = ''): Array<[string, string]> {
@@ -143,31 +143,5 @@ describe('spec sections 3-8 copy is verbatim (full string in spec)', () => {
   // normalized form — do not silently loosen the check.
   it.each(entries)('%s appears verbatim in spec sections 3-8', (_key, text) => {
     expect(sections3to8.includes(text)).toBe(true);
-  });
-});
-
-describe('forbidden wording', () => {
-  // Owner-approved documented exception (see CONTRACT_GAPS.md): spec §7.3
-  // mandates this exact string, and the §7 verbatim test requires it.
-  // Flagged, not reworded. Remove this entry only when the spec changes.
-  const documentedExceptions = new Set(['score.getBack.1']);
-
-  const hits = entries.filter(([, text]) => /80\s?%|confidence/i.test(text));
-
-  it('flags every hit by key (reported, never auto-fixed)', () => {
-    // Kept as an assertion so the hit list stays visible and current.
-    expect(hits.map(([key]) => key)).toEqual(['score.getBack.1']);
-  });
-
-  it('has no forbidden wording beyond the documented exceptions', () => {
-    const unexpected = hits.filter(([key]) => !documentedExceptions.has(key));
-    expect(unexpected).toEqual([]);
-  });
-
-  it('keeps the exception list honest (no stale entries)', () => {
-    const hitKeys = new Set(hits.map(([key]) => key));
-    for (const key of documentedExceptions) {
-      expect(hitKeys.has(key)).toBe(true);
-    }
   });
 });
