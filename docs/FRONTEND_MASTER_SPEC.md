@@ -116,11 +116,11 @@ Extracted from `docs/ui/creditlens_credit_risk_research_demo.html`. Put them in 
 | `info-bg` / `info-border` / `info-dot` | sky-50 #F0F9FF (90%) / sky-200 #BAE6FD / sky-500 #0EA5E9 | `Sample output` banner, "Provisional fields" note |
 | `riskbar-lower / moderate / higher` | teal-400 #2DD4BF (80%) / amber-300 #FCD34D / rose-400 #FB7185 (85%) | Result risk bar |
 | `thead` | slate-50 #F8FAFC (90%) | Table header bg |
-| `input-border` | slate-300 #CBD5E1 | Inputs, selects, dashed upload box (see 12.1 gap A2) |
+| `input-border` | slate-500 #64748B | Inputs, selects, dashed upload box (deliberate A2 deviation, see 12.1) |
 | `error` | #B91C1C | Form validation only (added in this spec) |
 | `logo-from / via / to` | teal-500 #14B8A6 / teal-600 #0D9488 / indigo-800 #3730A3 | Logo tile gradient (`bg-gradient-to-br`) |
 
-**Deliberate §4.1 deviation (owner-approved, A1):** the primary button uses `primary-hover` teal-700 #0F766E for its normal background so white 14px text reaches 4.5:1. The prototype still shows teal-600; all other `primary` fills keep the prototype colour.
+**Deliberate §4.1 deviations (owner-approved, A1 and A2):** the primary button uses `primary-hover` teal-700 #0F766E for its normal background so white 14px text reaches 4.5:1, with teal-800 #115E59 on hover (the prototype shows teal-600 with no hover change); all other `primary` fills keep the prototype colour. `input-border` is slate-500 #64748B instead of the prototype's slate-300 #CBD5E1 (see A2). The secondary button keeps `border-slate-300` #CBD5E1 explicitly, so its colour is unchanged by the A2 token change.
 
 Band pills (all `rounded-full px-2.5 py-0.5 text-xs font-semibold border`): Approve `bg-teal-50 text-teal-800 border-teal-200`; Review `bg-amber-100/90 text-amber-800 border-amber-200`; Reject `bg-rose-50 text-rose-800 border-rose-200`.
 Thin-file chip: `bg-amber-50 text-amber-800 border border-amber-300/90 rounded-full px-2.5 py-0.5 text-xs font-medium`.
@@ -160,7 +160,7 @@ Minimum text size anywhere: 12px.
   - `shadow-card-hover`: `0 10px 25px -5px rgba(15,23,42,.06), 0 4px 10px -4px rgba(15,23,42,.04)`
 - Banners, KPI tiles, summary strips, upload box, table wrappers: `rounded-xl`. Banners `px-4 py-3`.
 - **Buttons**: `rounded-xl px-5 py-3 text-sm font-semibold`, min-height 44. Primary `bg-teal-600 hover:bg-teal-700 text-white shadow-sm`. Secondary `bg-white hover:bg-slate-50 text-slate-800 border border-slate-300`. Compact (download, file chooser): `px-3.5 py-2 text-xs font-semibold text-teal-700`.
-- **Inputs and selects**: `w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-500`, min-height 44, focus `border-teal-600 ring-2 ring-teal-500/20`; selects `appearance-none pr-9` with a chevron icon.
+- **Inputs and selects**: `w-full rounded-xl border border-input-border bg-white px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-500`, min-height 44, focus `border-teal-600 ring-2 ring-teal-500/20`; selects `appearance-none pr-9` with a chevron icon. The `input-border` token is slate-500 #64748B (deliberate A2 deviation), not the prototype's slate-300.
 - Form grids: `grid-cols-1 sm:grid-cols-3 gap-4` (Past loans: `sm:grid-cols-2`); each fieldset has an `h2` with `pb-2 border-b border-slate-100`.
 - Page grids (12-col, `gap-7`/`gap-6`): Home hero `lg:` 7 / 5 (`gap-8 lg:gap-10`); How it works `sm:2 lg:4` cols `gap-5`; Score `lg:` 8 / 4; Result `lg:` 5 / 7; Batch top row `lg:` 5 / 7; Report calibration + fairness `lg:` 1 / 1; KPI tiles `sm:2 lg:4`. Stack to one column below `lg`.
 - Focus (all interactive elements): `outline: 2px solid #0D9488; outline-offset: 2px` on `:focus-visible`, never removed.
@@ -498,8 +498,8 @@ When `/meta` supplies a real value it overrides the constant; the constant is on
 ### 12.1 Accessibility (WCAG 2.2 AA)
 - All text meets 4.5:1 on its background; non-text UI (bars, outlines, focus) meets 3:1. `amber` #D97706 is **never used as text on white** (use `amber-text` #B45309).
 - **Known gaps in the prototype's palette (owner decision; each is a one-token change):**
-  - **A1. White text on `primary` buttons** (#0D9488) is about 3.7:1 and fails 4.5:1 for 14px text. **Resolved (owner-approved deviation from §4.1):** the app's primary button bg is now `primary-hover` #0F766E (about 5.5:1); the prototype file still shows teal-600. No other `primary` colour changed.
-  - **A2. Input and select borders** (slate-300 #CBD5E1) are about 1.6:1 against white and fail the 3:1 non-text rule. Fix: `input-border` → #7B8794. Default: prototype colour.
+  - **A1. White text on `primary` buttons** (#0D9488) is about 3.7:1 and fails 4.5:1 for 14px text. **Resolved (owner-approved deviation from §4.1):** the app's primary button bg is now `primary-hover` #0F766E (measured 5.47:1 with white), with teal-800 #115E59 on hover; the prototype file still shows teal-600 with no hover change. No other `primary` colour changed.
+  - **A2. Input and select borders** (slate-300 #CBD5E1) were measured at 1.49:1 against white and failed the 3:1 non-text rule. **Resolved (owner-approved deviation from §4.1):** `input-border` is now slate-500 #64748B, measured at **4.76:1** against white; the prototype file still shows slate-300. The single source is the `input-border` token in `tailwind.config.ts`; the Home secondary button opts out with `border-slate-300` so its colour stays #CBD5E1.
   - Everything else the prototype showed as failing (placeholders, `—` cells, 11px text, the pale Review bars, missing focus rings) is already fixed in the prototype file.
 - Semantic landmarks (`header`, `nav`, `main`, `footer`), one H1 per page, headings in order.
 - Every input has a visible `<label>`; helper/error linked by `aria-describedby`; errors `role="alert"`.

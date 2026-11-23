@@ -63,13 +63,13 @@ export default function Home() {
           <div className="flex flex-wrap items-center gap-3.5 pt-1">
             <Link
               to="/score"
-              className="inline-flex min-h-touch items-center justify-center rounded-xl bg-primary-hover px-5 py-3 text-sm font-semibold text-white shadow-sm transition-all"
+              className="inline-flex min-h-touch items-center justify-center rounded-xl bg-primary-hover px-5 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:bg-teal-800"
             >
               {copy.home.tryDemo}
             </Link>
             <Link
               to="/report"
-              className="inline-flex min-h-touch items-center justify-center rounded-xl border border-input-border bg-surface px-5 py-3 text-sm font-semibold text-ink shadow-sm transition-all hover:bg-slate-50"
+              className="inline-flex min-h-touch items-center justify-center rounded-xl border border-slate-300 bg-surface px-5 py-3 text-sm font-semibold text-ink shadow-sm transition-all hover:bg-slate-50"
             >
               {copy.home.readReport}
             </Link>

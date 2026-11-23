@@ -70,26 +70,35 @@ test.describe('screenshot evidence: Home vs prototype', () => {
   }
 });
 
-test('axe: no violations on /', async ({ page }) => {
-  await page.setViewportSize({ width: 1280, height: 900 });
-  await page.goto('/');
-  await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-  const results = await new AxeBuilder({ page }).analyze();
-  writeFileSync(
-    'tests/e2e/__screenshots__/home-axe-1280.json',
-    JSON.stringify(results.violations, null, 2),
-  );
-  expect(results.violations).toEqual([]);
-});
+/**
+ * Spec 12.3: all five routes at 360 / 768 / 1280, plus the 404 route.
+ * Result normally redirects to /score without router state, so seed the state
+ * React Router reads (history.state.usr) to exercise the real Result render.
+ */
+const AXE_ROUTES = ['/', '/score', '/score/result', '/batch', '/report', '/no-such-page'];
 
-test('axe: no violations on /score', async ({ page }) => {
-  await page.setViewportSize({ width: 1280, height: 900 });
-  await page.goto('/score');
-  await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-  const results = await new AxeBuilder({ page }).analyze();
-  writeFileSync(
-    'tests/e2e/__screenshots__/score-axe-1280.json',
-    JSON.stringify(results.violations, null, 2),
-  );
-  expect(results.violations).toEqual([]);
-});
+for (const route of AXE_ROUTES) {
+  for (const width of [360, 768, 1280]) {
+    test(`axe: no violations on ${route} at ${width}px`, async ({ page }) => {
+      if (route === '/score/result') {
+        await page.addInitScript(() => {
+          window.history.replaceState({ usr: { from: 'score' } }, '');
+        });
+      }
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto(route);
+      await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+      if (route === '/score/result') {
+        await expect(page.getByRole('heading', { level: 1 })).toHaveText('Result');
+      }
+
+      const results = await new AxeBuilder({ page }).analyze();
+      const slug = route === '/' ? 'home' : route.replace(/^\//u, '').replaceAll('/', '-');
+      writeFileSync(
+        `tests/e2e/__screenshots__/axe-${slug}-${width}.json`,
+        JSON.stringify(results.violations, null, 2),
+      );
+      expect(results.violations).toEqual([]);
+    });
+  }
+}

@@ -60,7 +60,7 @@ const config: Config = {
 
         // Tables, controls and validation.
         thead: '#F8FAFC', // 90% in use
-        'input-border': '#CBD5E1',
+        'input-border': '#64748B',
         error: '#B91C1C',
 
         // Logo tile gradient (spec 4.4).
