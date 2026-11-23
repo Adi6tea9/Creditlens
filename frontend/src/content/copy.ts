@@ -152,6 +152,7 @@ export const copy = {
     estimating: "Estimating…",
     validationExample: "Enter a number of 0 or more.",
     submitError: "Could not get an estimate. Check the values and try again.",
+    metaFailure: "[FAILURE WORDING]",
   },
 
   // ---- 6.3 Result (7.4 points here) -------------------------------------

@@ -23,7 +23,7 @@ function LocationProbe() {
   return <div data-testid="location">{`${pathname}|${JSON.stringify(state)}`}</div>;
 }
 
-async function renderScore() {
+async function renderScore({ waitForField = true } = {}) {
   const view = render(
     <MemoryRouter initialEntries={['/score']}>
       <Routes>
@@ -40,7 +40,11 @@ async function renderScore() {
       </Routes>
     </MemoryRouter>,
   );
-  await screen.findByLabelText('Loan type');
+  if (waitForField) {
+    await screen.findByLabelText('Loan type');
+  } else {
+    await screen.findByRole('heading', { level: 1, name: copy.score.h1 });
+  }
   return view;
 }
 
@@ -80,6 +84,15 @@ describe('Score form (spec 6.2)', () => {
     expect(screen.getByText(copy.score.goodToKnow)).toBeInTheDocument();
     expect(screen.getByText(/Provisional fields\./)).toBeInTheDocument();
     expect(screen.getByText(/Provisional options\./)).toBeInTheDocument();
+  });
+
+  it('shows the meta failure string instead of the form when /meta fails', async () => {
+    mocks.getMeta.mockRejectedValue(new Error('offline'));
+    const { container } = await renderScore({ waitForField: false });
+
+    expect(screen.getByText(copy.score.metaFailure)).toBeInTheDocument();
+    expect(container.querySelector('form')).toBeNull();
+    expect(screen.queryByLabelText('Loan type')).toBeNull();
   });
 
   it('shows the preview note only in mock mode and hides the provisional note when fields are final', async () => {

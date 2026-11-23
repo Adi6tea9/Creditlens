@@ -41,6 +41,7 @@ function BoldNote({ text }: { text: string }) {
 export default function Score() {
   const navigate = useNavigate();
   const [meta, setMeta] = useState<Meta>();
+  const [metaFailed, setMetaFailed] = useState(false);
   const [values, setValues] = useState<Record<string, string>>({});
   const [errors, setErrors] = useState<Record<string, string | undefined>>({});
   const [submitting, setSubmitting] = useState(false);
@@ -56,7 +57,7 @@ export default function Score() {
         setValues(Object.fromEntries(data.fields.map((field) => [field.id, ''])));
       })
       .catch(() => {
-        // No spec copy for an API failure; keep the page header usable.
+        if (active) setMetaFailed(true);
       });
     return () => {
       active = false;
@@ -120,6 +121,7 @@ export default function Score() {
 
       <div className="flex flex-wrap items-start gap-6">
         <div className="min-w-0 flex-[999_1_560px] rounded-2xl border border-border/90 bg-surface p-6 shadow-card sm:p-8">
+          {metaFailed && <p>{copy.score.metaFailure}</p>}
           {meta && (
             <form noValidate onSubmit={handleSubmit} className="space-y-8">
               {submitError && (

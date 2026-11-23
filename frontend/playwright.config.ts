@@ -6,12 +6,22 @@ export default defineConfig({
   use: {
     baseURL: 'http://127.0.0.1:4173',
   },
-  // Serves the production build; run `npm run build` before `npx playwright test`.
-  webServer: {
-    command: 'npm run preview -- --host 127.0.0.1 --port 4173 --strictPort',
-    url: 'http://127.0.0.1:4173',
-    reuseExistingServer: true,
-    timeout: 60_000,
-  },
+  // 4173: production build (run `npm run build` first) for axe/submit tests.
+  // 4174: mock-mode build so the screenshot shows the Preview note, as in the prototype.
+  webServer: [
+    {
+      command: 'npm run preview -- --host 127.0.0.1 --port 4173 --strictPort',
+      url: 'http://127.0.0.1:4173',
+      reuseExistingServer: true,
+      timeout: 60_000,
+    },
+    {
+      command:
+        'npm run build:mock && npm run preview -- --host 127.0.0.1 --port 4174 --strictPort --outDir dist-mock',
+      url: 'http://127.0.0.1:4174',
+      reuseExistingServer: true,
+      timeout: 120_000,
+    },
+  ],
   projects: [{ name: 'chromium', use: { browserName: 'chromium' } }],
 });

@@ -5,6 +5,8 @@ import { pathToFileURL } from 'node:url';
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 
+import { getMeta as mockGetMeta } from '../../src/api/mock';
+
 // Prototype is the repo's visual source of truth (spec authority 1). It loads
 // Tailwind/fonts from CDNs, so fidelity needs network access.
 const prototypeUrl = pathToFileURL(
@@ -85,9 +87,22 @@ for (const route of AXE_ROUTES) {
           window.history.replaceState({ usr: { from: 'score' } }, '');
         });
       }
+      // Production build has no backend; mock /api/meta so the real form renders.
+      if (route === '/score') {
+        await page.route('**/api/meta', async (route) => {
+          await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify(await mockGetMeta()),
+          });
+        });
+      }
       await page.setViewportSize({ width, height: 900 });
       await page.goto(route);
       await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+      if (route === '/score') {
+        await expect(page.getByLabel('Loan type')).toBeVisible();
+      }
       if (route === '/score/result') {
         await expect(page.getByRole('heading', { level: 1 })).toHaveText('Result');
       }
