@@ -5,7 +5,7 @@ import { pathToFileURL } from 'node:url';
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 
-import { getMeta as mockGetMeta } from '../../src/api/mock';
+import { getMeta as mockGetMeta, postScore as mockPostScore } from '../../src/api/mock';
 
 // Prototype is the repo's visual source of truth (spec authority 1). It loads
 // Tailwind/fonts from CDNs, so fidelity needs network access.
@@ -83,9 +83,13 @@ for (const route of AXE_ROUTES) {
   for (const width of [360, 768, 1280]) {
     test(`axe: no violations on ${route} at ${width}px`, async ({ page }) => {
       if (route === '/score/result') {
-        await page.addInitScript(() => {
-          window.history.replaceState({ usr: { from: 'score' } }, '');
-        });
+        const state = {
+          ...(await mockPostScore()),
+          thin_file_short: (await mockGetMeta()).thin_file_short,
+        };
+        await page.addInitScript((seed) => {
+          window.history.replaceState({ usr: seed }, '');
+        }, state);
       }
       // Production build has no backend; mock /api/meta so the real form renders.
       if (route === '/score') {

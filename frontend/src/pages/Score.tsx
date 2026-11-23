@@ -100,7 +100,11 @@ export default function Score() {
       ]),
     );
     postScore(payload)
-      .then((result) => navigate('/score/result', { state: result }))
+      .then((result) =>
+        navigate('/score/result', {
+          state: { ...result, thin_file_short: meta.thin_file_short },
+        }),
+      )
       .catch((error: unknown) => {
         const detail = (error as { detail?: unknown }).detail;
         setSubmitError(

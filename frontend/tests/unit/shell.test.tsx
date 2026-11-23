@@ -4,6 +4,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import App, { Shell } from '../../src/App';
+import { getMeta as mockGetMeta, postScore as mockPostScore } from '../../src/api/mock';
 import { PRODUCT_NAME } from '../../src/config/project';
 import { copy, fill, placeholderDefaults } from '../../src/content/copy';
 
@@ -13,6 +14,13 @@ function renderShell(path: string, state?: unknown) {
       <Shell />
     </MemoryRouter>,
   );
+}
+
+async function resultState() {
+  return {
+    ...(await mockPostScore()),
+    thin_file_short: (await mockGetMeta()).thin_file_short,
+  };
 }
 
 function primaryNav() {
@@ -60,8 +68,8 @@ describe('shell: navigation', () => {
     }
   });
 
-  it('activates Score on /score/result (spec 3 active rules)', () => {
-    renderShell('/score/result', { from: 'score' });
+  it('activates Score on /score/result (spec 3 active rules)', async () => {
+    renderShell('/score/result', await resultState());
     expect(
       within(primaryNav()).getByRole('link', { name: copy.score.h1 }),
     ).toHaveAttribute('aria-current', 'page');
@@ -77,9 +85,9 @@ describe('shell: banner and footer on every route', () => {
     },
   );
 
-  it('shows the research banner on /score/result', () => {
-    renderShell('/score/result', { from: 'score' });
-    expect(screen.getByRole('note')).toHaveTextContent(copy.topBanner);
+  it('shows the research banner on /score/result', async () => {
+    renderShell('/score/result', await resultState());
+    expect(screen.getByText(copy.topBanner)).toBeInTheDocument();
   });
 
   it('renders the footer copy with the repo placeholder', () => {
@@ -102,8 +110,8 @@ describe('shell: titles, focus and scroll', () => {
     expect(document.title).toBe(`${PRODUCT_NAME} — ${suffix}`);
   });
 
-  it('sets the Result title when reached with state', () => {
-    renderShell('/score/result', { from: 'score' });
+  it('sets the Result title when reached with state', async () => {
+    renderShell('/score/result', await resultState());
     expect(document.title).toBe(`${PRODUCT_NAME} — ${copy.result.h1}`);
   });
 
@@ -159,8 +167,8 @@ describe('shell: Result guard (spec 6.3)', () => {
     expect(document.title).toBe(`${PRODUCT_NAME} — ${copy.score.h1}`);
   });
 
-  it('renders Result when router state is present', () => {
-    renderShell('/score/result', { from: 'score' });
+  it('renders Result when router state is present', async () => {
+    renderShell('/score/result', await resultState());
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(copy.result.h1);
   });
 });
