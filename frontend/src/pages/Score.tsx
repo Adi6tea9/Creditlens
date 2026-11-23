@@ -1,13 +1,15 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { getMeta, postScore, useMock } from '../api/client';
+import { postScore, useMock } from '../api/client';
 import type { Meta } from '../api/schemas';
+import { LoadingCard, StateError } from '../components/AsyncState';
 import Banner from '../components/Banner';
 import Card from '../components/Card';
 import Field from '../components/Field';
 import Page from '../components/Page';
 import { copy } from '../content/copy';
+import { useMeta } from '../hooks/useMeta';
 
 type FieldSchema = Meta['fields'][number];
 type Control = HTMLInputElement | HTMLSelectElement;
@@ -40,29 +42,20 @@ function BoldNote({ text }: { text: string }) {
 /** Spec 6.2 — schema-driven single-applicant form. */
 export default function Score() {
   const navigate = useNavigate();
-  const [meta, setMeta] = useState<Meta>();
-  const [metaFailed, setMetaFailed] = useState(false);
+  const { meta, status: metaStatus, retry: retryMeta } = useMeta();
   const [values, setValues] = useState<Record<string, string>>({});
   const [errors, setErrors] = useState<Record<string, string | undefined>>({});
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string>();
+  const [lastSubmit, setLastSubmit] = useState<{
+    payload: Record<string, number | string>;
+    thinFileShort: string;
+  }>();
   const controls = useRef<Record<string, Control | null>>({});
 
   useEffect(() => {
-    let active = true;
-    getMeta()
-      .then((data) => {
-        if (!active) return;
-        setMeta(data);
-        setValues(Object.fromEntries(data.fields.map((field) => [field.id, ''])));
-      })
-      .catch(() => {
-        if (active) setMetaFailed(true);
-      });
-    return () => {
-      active = false;
-    };
-  }, []);
+    if (meta) setValues(Object.fromEntries(meta.fields.map((field) => [field.id, ''])));
+  }, [meta]);
 
   const groups = meta ? [...new Set(meta.fields.map((field) => field.group))] : [];
 
@@ -91,18 +84,25 @@ export default function Score() {
       return;
     }
 
+    submit(
+      Object.fromEntries(
+        meta.fields.map((field) => [
+          field.id,
+          field.type === 'number' ? Number(values[field.id]) : values[field.id],
+        ]),
+      ),
+      meta.thin_file_short,
+    );
+  }
+
+  function submit(payload: Record<string, number | string>, thinFileShort: string) {
     setSubmitting(true);
     setSubmitError(undefined);
-    const payload = Object.fromEntries(
-      meta.fields.map((field) => [
-        field.id,
-        field.type === 'number' ? Number(values[field.id]) : values[field.id],
-      ]),
-    );
+    setLastSubmit({ payload, thinFileShort });
     postScore(payload)
       .then((result) =>
         navigate('/score/result', {
-          state: { ...result, thin_file_short: meta.thin_file_short },
+          state: { ...result, thin_file_short: thinFileShort },
         }),
       )
       .catch((error: unknown) => {
@@ -125,16 +125,23 @@ export default function Score() {
 
       <div className="flex flex-wrap items-start gap-6">
         <div className="min-w-0 flex-[999_1_560px] rounded-2xl border border-border/90 bg-surface p-6 shadow-card sm:p-8">
-          {metaFailed && <p>{copy.score.metaFailure}</p>}
+          {metaStatus === 'loading' && <LoadingCard rows={9} className="space-y-3" />}
+          {metaStatus === 'error' && (
+            <div className="space-y-4">
+              <p className="text-sm text-error">{copy.score.metaFailure}</p>
+              <StateError onRetry={retryMeta} className="" />
+            </div>
+          )}
           {meta && (
             <form noValidate onSubmit={handleSubmit} className="space-y-8">
               {submitError && (
-                <div
-                  role="alert"
-                  className="rounded-xl border-2 border-error px-4 py-3 text-sm text-error"
-                >
-                  {submitError}
-                </div>
+                <StateError
+                  message={submitError}
+                  onRetry={() =>
+                    lastSubmit && submit(lastSubmit.payload, lastSubmit.thinFileShort)
+                  }
+                  className="rounded-xl border-2 border-error px-4 py-3"
+                />
               )}
 
               {groups.map((group) => {

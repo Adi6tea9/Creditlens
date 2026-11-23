@@ -1,6 +1,7 @@
-import { render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
 
+import { LoadingCard, ServiceOutage, StateError } from '../../src/components/AsyncState';
 import Banner from '../../src/components/Banner';
 import BandPill from '../../src/components/BandPill';
 import Card from '../../src/components/Card';
@@ -173,5 +174,31 @@ describe('DataTable (spec 5)', () => {
     const { container } = render(<DataTable columns={columns} rows={rows} />);
     const wrapper = container.firstElementChild as HTMLElement;
     expect(wrapper.className).toContain('overflow-x-auto');
+  });
+});
+
+describe('async states (spec 8)', () => {
+  it('skeleton is a card-shaped busy region with no numbers', () => {
+    const { container } = render(<LoadingCard rows={4} />);
+    const status = screen.getByRole('status', { name: copy.states.loading });
+    expect(status).toHaveAttribute('aria-busy', 'true');
+    expect(status.className).toContain('rounded-2xl');
+    expect(container.querySelectorAll('.animate-pulse')).toHaveLength(5);
+    expect(status.textContent).toBe('');
+  });
+
+  it('in-card error shows the spec copy and calls Retry', () => {
+    const onRetry = vi.fn();
+    render(<StateError onRetry={onRetry} />);
+    const alert = screen.getByRole('alert');
+    expect(alert).toHaveTextContent(copy.states.loadError);
+    fireEvent.click(screen.getByRole('button', { name: copy.states.retry }));
+    expect(onRetry).toHaveBeenCalledTimes(1);
+  });
+
+  it('outage card uses the exact service-unavailable sentence', () => {
+    render(<ServiceOutage onRetry={vi.fn()} />);
+    expect(screen.getByRole('alert')).toHaveTextContent(copy.states.serviceUnavailable);
+    expect(screen.getByRole('button', { name: copy.states.retry })).toBeInTheDocument();
   });
 });

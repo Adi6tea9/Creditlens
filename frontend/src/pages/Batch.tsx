@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState, type ChangeEvent } from 'react';
 
-import { ApiError, getMeta, postBatch, useMock } from '../api/client';
+import { ApiError, postBatch, useMock } from '../api/client';
 import { postBatch as mockPostBatch } from '../api/mock';
-import type { Batch as BatchResult, BatchError, Meta } from '../api/schemas';
+import type { Batch as BatchResult, BatchError } from '../api/schemas';
+import { LoadingCard, StateError } from '../components/AsyncState';
 import BandPill from '../components/BandPill';
 import Banner from '../components/Banner';
 import Card from '../components/Card';
@@ -13,6 +14,7 @@ import KpiTile from '../components/KpiTile';
 import Page from '../components/Page';
 import { DEFAULT_APPROVE, DEFAULT_REJECT } from '../config/project';
 import { copy, fill } from '../content/copy';
+import { useMeta } from '../hooks/useMeta';
 import { bandPercentages } from '../lib/bands';
 import { downloadCsv, toCsv } from '../lib/csv';
 import { formatCount, formatFixed } from '../lib/format';
@@ -35,35 +37,26 @@ function BoldNote({ text }: { text: string }) {
 /** Spec 6.4 — upload, cutoffs, ranked results and CSV, all from one band rule. */
 export default function Batch() {
   const mockMode = useMock();
-  const [meta, setMeta] = useState<Meta>();
+  const { meta } = useMeta();
   const [batch, setBatch] = useState<BatchResult>();
+  const [batchLoading, setBatchLoading] = useState(mockMode);
+  const [file, setFile] = useState<File>();
   const [approve, setApprove] = useState(DEFAULT_APPROVE);
   const [reject, setReject] = useState(DEFAULT_REJECT);
   const [fileName, setFileName] = useState('');
   const [uploadError, setUploadError] = useState<string>();
+  const [uploadFailed, setUploadFailed] = useState(false);
   const [rowErrors, setRowErrors] = useState<BatchError['row_errors']>([]);
   const [scoring, setScoring] = useState(false);
   const [page, setPage] = useState(0);
 
   useEffect(() => {
-    let active = true;
-    getMeta()
-      .then((data) => {
-        if (active) setMeta(data);
-      })
-      .catch(() => {
-        // The template link needs fields; a failed /meta simply hides it.
-      });
-    return () => {
-      active = false;
-    };
-  }, []);
-
-  useEffect(() => {
     if (!mockMode) return;
     let active = true;
     mockPostBatch().then((data) => {
-      if (active) setBatch(data);
+      if (!active) return;
+      setBatch(data);
+      setBatchLoading(false);
     });
     return () => {
       active = false;
@@ -98,21 +91,11 @@ export default function Batch() {
     setReject(Math.max(value, approve));
   }
 
-  async function handleFile(event: ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
-    event.target.value = '';
-    if (!file) return;
-
-    setFileName(file.name);
-    setUploadError(undefined);
-    setRowErrors([]);
-
-    if (await exceedsUploadLimits(file)) {
-      setUploadError(copy.batch.tooLarge);
-      return;
-    }
-
+  async function scoreFile(file: File) {
     setScoring(true);
+    setUploadError(undefined);
+    setUploadFailed(false);
+    setRowErrors([]);
     try {
       setBatch(await postBatch(file));
     } catch (error) {
@@ -121,10 +104,25 @@ export default function Batch() {
         setRowErrors(error.rowErrors ?? []);
       } else {
         setUploadError(error instanceof Error ? error.message : String(error));
+        setUploadFailed(true);
       }
     } finally {
       setScoring(false);
     }
+  }
+
+  async function handleFile(event: ChangeEvent<HTMLInputElement>) {
+    const chosen = event.target.files?.[0];
+    event.target.value = '';
+    if (!chosen) return;
+
+    setFileName(chosen.name);
+    setFile(chosen);
+    if (await exceedsUploadLimits(chosen)) {
+      setUploadError(copy.batch.tooLarge);
+      return;
+    }
+    await scoreFile(chosen);
   }
 
   function downloadTemplate() {
@@ -192,10 +190,18 @@ export default function Batch() {
             </button>
           )}
 
-          {uploadError && (
+          {uploadError && !uploadFailed && (
             <p role="alert" className="text-xs font-medium text-error">
               {uploadError}
             </p>
+          )}
+
+          {uploadFailed && file && (
+            <StateError
+              message={uploadError}
+              onRetry={() => void scoreFile(file)}
+              className="rounded-xl border-2 border-error px-4 py-3 text-xs"
+            />
           )}
 
           {rowErrors.length > 0 && (
@@ -261,7 +267,7 @@ export default function Batch() {
 
       <section
         aria-labelledby="batch-results-heading"
-        aria-busy={scoring}
+        aria-busy={scoring || batchLoading}
         className="space-y-8 rounded-2xl border border-border/90 bg-surface p-6 shadow-card sm:p-8"
       >
         <h2 id="batch-results-heading" className="text-base font-bold text-ink">
@@ -269,12 +275,18 @@ export default function Batch() {
         </h2>
 
         {scoring && (
-          <p role="status" className="text-sm font-medium text-muted">
-            {copy.batch.scoring}
-          </p>
+          <div className="space-y-3">
+            <p role="status" className="text-sm font-medium text-muted">
+              {copy.batch.scoring}
+            </p>
+            <LoadingCard rows={5} className="space-y-3" />
+          </div>
         )}
+        {!scoring && batchLoading && <LoadingCard rows={5} className="space-y-3" />}
 
-        {!batch && !scoring && <p className="text-sm text-muted">{copy.batch.emptyState}</p>}
+        {!batch && !scoring && !batchLoading && (
+          <p className="text-sm text-muted">{copy.batch.emptyState}</p>
+        )}
 
         {batch && !scoring && (
           <>

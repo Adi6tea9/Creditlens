@@ -1,12 +1,14 @@
 import { useEffect, useState, type ReactNode } from 'react';
 
-import { getMeta, getReport } from '../api/client';
+import { getReport } from '../api/client';
 import type { Report as ReportData } from '../api/schemas';
+import { LoadingCard, StateError } from '../components/AsyncState';
 import Banner from '../components/Banner';
 import CalibrationChart from '../components/CalibrationChart';
 import DataTable from '../components/DataTable';
 import Page from '../components/Page';
 import { copy, fill, placeholderDefaults } from '../content/copy';
+import { useMeta } from '../hooks/useMeta';
 import { formatCount, toPercent } from '../lib/format';
 
 type GroupKey = ReportData['groups'][number]['key'];
@@ -141,32 +143,35 @@ function FairnessTable({ fairness, trained }: { fairness: ReportData['fairness']
 
 /** Spec 6.5 — nothing on this page is a result until /report says it is. */
 export default function Report() {
+  const { meta } = useMeta();
+  const thinDefinition = meta?.thin_file_definition ?? placeholderDefaults.thin_file_definition;
   const [report, setReport] = useState<ReportData>();
-  const [loadError, setLoadError] = useState<string>();
-  const [thinDefinition, setThinDefinition] = useState<string>(
-    placeholderDefaults.thin_file_definition,
+  const [reportStatus, setReportStatus] = useState<'idle' | 'loading' | 'ready' | 'error'>(
+    'idle',
   );
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
     let active = true;
+    setReportStatus('loading');
     getReport()
       .then((data) => {
-        if (active) setReport(data);
-      })
-      .catch((error: unknown) => {
-        if (active) setLoadError(error instanceof Error ? error.message : 'Request failed');
-      });
-    getMeta()
-      .then((data) => {
-        if (active) setThinDefinition(data.thin_file_definition);
+        if (!active) return;
+        setReport(data);
+        setReportStatus('ready');
       })
       .catch(() => {
-        // The thin-file definition falls back to the config value.
+        if (active) setReportStatus('error');
       });
     return () => {
       active = false;
     };
-  }, []);
+  }, [attempt]);
+
+  function retry() {
+    setReport(undefined);
+    setAttempt((current) => current + 1);
+  }
 
   const trained = report?.model_trained === true;
   const note = report?.evaluation_note?.trim();
@@ -178,13 +183,24 @@ export default function Report() {
       <Page title={copy.report.h1} h1={copy.report.h1} />
       <p className="text-sm sm:text-base text-muted">{copy.report.lead}</p>
 
-      {loadError && (
-        <p role="alert" className="rounded-xl border border-error/30 bg-white p-4 text-sm text-error">
-          {loadError}
-        </p>
+      {reportStatus === 'loading' && (
+        <div className="space-y-6" aria-busy="true">
+          <LoadingCard rows={4} />
+          <div className="flex flex-wrap gap-6">
+            <LoadingCard
+              rows={5}
+              className="min-w-0 flex-[1_1_420px] rounded-2xl border border-border/90 bg-surface p-8 shadow-card"
+            />
+            <LoadingCard
+              rows={5}
+              className="min-w-0 flex-[1_1_420px] rounded-2xl border border-border/90 bg-surface p-8 shadow-card"
+            />
+          </div>
+        </div>
       )}
+      {reportStatus === 'error' && <StateError onRetry={retry} />}
 
-      {report && (
+      {report && reportStatus === 'ready' && (
         <>
           {!trained ? (
             <Banner variant="warn">

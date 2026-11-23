@@ -4,6 +4,8 @@ import { pathToFileURL } from 'node:url';
 
 import { expect, test } from '@playwright/test';
 
+import { getMeta as mockGetMeta } from '../../src/api/mock';
+
 const BANNER =
   'Research demo. Not a lending decision. Nothing here is a real score or a real applicant.';
 
@@ -83,6 +85,13 @@ test.describe('shell behaviour', () => {
 test.describe('screenshot evidence: app shell vs prototype', () => {
   for (const width of [360, 768, 1280]) {
     test(`shell at ${width}px beside the prototype`, async ({ page }) => {
+      await page.route('**/api/meta', async (route) => {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify(await mockGetMeta()),
+        });
+      });
       await page.setViewportSize({ width, height: 900 });
       await page.goto('/');
       await expect(page.getByRole('heading', { level: 1 })).toBeVisible();

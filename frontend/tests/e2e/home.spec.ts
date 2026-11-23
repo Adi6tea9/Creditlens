@@ -44,6 +44,13 @@ test.describe('Home layout (spec 6.1)', () => {
 test.describe('screenshot evidence: Home vs prototype', () => {
   for (const width of [360, 768, 1280]) {
     test(`Home at ${width}px beside the prototype`, async ({ page }) => {
+      await page.route('**/api/meta', async (route) => {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify(await mockGetMeta()),
+        });
+      });
       await page.setViewportSize({ width, height: 900 });
       await page.goto('/');
       await expect(page.getByRole('heading', { level: 1 })).toBeVisible();

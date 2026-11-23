@@ -311,6 +311,7 @@ export const copy = {
 
   // ---- 8. States --------------------------------------------------------
   states: {
+    loading: "Loading",
     loadError: "Something went wrong loading this. Try again.",
     retry: "Retry",
     serviceUnavailable: "The scoring service is not available right now.",

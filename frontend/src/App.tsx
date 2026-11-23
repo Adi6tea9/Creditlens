@@ -1,8 +1,10 @@
 import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom';
 
+import { ServiceOutage } from './components/AsyncState';
 import Footer from './components/Footer';
 import Header from './components/Header';
 import TopBanner from './components/TopBanner';
+import { useMeta } from './hooks/useMeta';
 import Batch from './pages/Batch';
 import Home from './pages/Home';
 import NotFound from './pages/NotFound';
@@ -16,6 +18,7 @@ import Score from './pages/Score';
  */
 export function Shell() {
   const { pathname } = useLocation();
+  const { status, retry } = useMeta();
   return (
     <div className="flex min-h-screen flex-col">
       <TopBanner />
@@ -23,6 +26,7 @@ export function Shell() {
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
         {/* Spec 3 — panels fade in on route change (reduced-motion safe). */}
         <div key={pathname} className="animate-fadeSlideIn space-y-6">
+          {status === 'error' && <ServiceOutage onRetry={retry} />}
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/score" element={<Score />} />

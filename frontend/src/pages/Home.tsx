@@ -1,9 +1,9 @@
-import { useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useId, useRef } from 'react';
 import { Link } from 'react-router-dom';
 
-import { getMeta } from '../api/client';
 import { PRODUCT_NAME } from '../config/project';
 import { copy } from '../content/copy';
+import { useMeta } from '../hooks/useMeta';
 
 const LINK_ROUTES = ['/score', '/batch', '/report'];
 
@@ -20,7 +20,9 @@ const STEP_COLORS = [
  * the hero grid, so it cannot use Page's single top-level H1 wrapper.
  */
 export default function Home() {
-  const [modelTrained, setModelTrained] = useState(false);
+  const { meta } = useMeta();
+  // A failed /meta keeps the conservative "Not trained yet." disclaimer.
+  const modelTrained = meta?.model_trained === true;
   const heading = useRef<HTMLHeadingElement>(null);
   const canDoId = useId();
   const howId = useId();
@@ -30,13 +32,6 @@ export default function Home() {
     document.title = `${PRODUCT_NAME} — ${copy.nav.home}`;
     window.scrollTo(0, 0);
     heading.current?.focus({ preventScroll: true });
-  }, []);
-
-  useEffect(() => {
-    // A failed /meta request leaves the disclaimer visible (owner ruling).
-    getMeta()
-      .then((meta) => setModelTrained(meta.model_trained))
-      .catch(() => undefined);
   }, []);
 
   return (
