@@ -202,35 +202,37 @@ export default function CalibrationChart({ series }: { series: Report['calibrati
         </ul>
       )}
 
-      <table className="sr-only">
-        <caption>{copy.report.calibrationAria}</caption>
-        <thead>
-          <tr>
-            <th scope="col">Group</th>
-            <th scope="col">{copy.report.performanceColumns[2]}</th>
-            <th scope="col">{copy.report.observedDefaultRate}</th>
-            <th scope="col">{copy.report.performanceColumns[1]}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {isEmpty ? (
+      <div className="sr-only">
+        <table>
+          <caption>{copy.report.calibrationAria}</caption>
+          <thead>
             <tr>
-              <td colSpan={4}>{copy.report.calibrationEmpty}</td>
+              <th scope="col">Group</th>
+              <th scope="col">{copy.report.performanceColumns[2]}</th>
+              <th scope="col">{copy.report.observedDefaultRate}</th>
+              <th scope="col">{copy.report.performanceColumns[1]}</th>
             </tr>
-          ) : (
-            plotted.flatMap((group) =>
-              group.points.map((point: CalibrationPoint, index) => (
-                <tr key={`${group.key}-${index}`}>
-                  <th scope="row">{SERIES_STYLE[group.key].label}</th>
-                  <td>{toPercent(point.pred, 1)}</td>
-                  <td>{toPercent(point.obs, 1)}</td>
-                  <td>{formatCount(point.n)}</td>
-                </tr>
-              )),
-            )
-          )}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {isEmpty ? (
+              <tr>
+                <td colSpan={4}>{copy.report.calibrationEmpty}</td>
+              </tr>
+            ) : (
+              plotted.flatMap((group) =>
+                group.points.map((point: CalibrationPoint, index) => (
+                  <tr key={`${group.key}-${index}`}>
+                    <th scope="row">{SERIES_STYLE[group.key].label}</th>
+                    <td>{toPercent(point.pred, 1)}</td>
+                    <td>{toPercent(point.obs, 1)}</td>
+                    <td>{formatCount(point.n)}</td>
+                  </tr>
+                )),
+              )
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
