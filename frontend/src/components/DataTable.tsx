@@ -6,17 +6,27 @@ interface DataTableProps {
   /** Per-column alignment; numbers should be right-aligned (spec 5). */
   align?: Array<'left' | 'right'>;
   caption?: string;
+  minWidthClass?: string;
+  /** Column that identifies the row (spec 5 defaults to the first column). */
+  rowHeaderIndex?: number;
 }
 
 /**
  * Spec 5 — scrollable table. Never display:flex on a td/th; wrap cell content
  * in an inner inline-flex span instead. First-column cell is th scope="row".
  */
-export default function DataTable({ columns, rows, align, caption }: DataTableProps) {
+export default function DataTable({
+  columns,
+  rows,
+  align,
+  caption,
+  minWidthClass = 'min-w-full',
+  rowHeaderIndex = 0,
+}: DataTableProps) {
   const cellAlign = (i: number) => (align?.[i] === 'right' ? 'text-right' : 'text-left');
   return (
     <div className="overflow-x-auto rounded-xl border border-slate-200/90">
-      <table className="min-w-full divide-y divide-slate-200">
+      <table className={`${minWidthClass} divide-y divide-slate-200`}>
         {caption && <caption className="sr-only">{caption}</caption>}
         <thead className="bg-thead/90">
           <tr>
@@ -35,7 +45,7 @@ export default function DataTable({ columns, rows, align, caption }: DataTablePr
           {rows.map((row, r) => (
             <tr key={r} className="hover:bg-slate-50/70">
               {row.map((cell, c) =>
-                c === 0 ? (
+                c === rowHeaderIndex ? (
                   <th
                     key={c}
                     scope="row"
