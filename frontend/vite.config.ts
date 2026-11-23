@@ -6,5 +6,7 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     setupFiles: ['./tests/setup.ts'],
+    // Playwright specs are run by `npx playwright test`, not Vitest.
+    exclude: ['tests/e2e/**', 'node_modules/**', 'dist/**'],
   },
 });

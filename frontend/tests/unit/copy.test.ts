@@ -111,7 +111,9 @@ const completeTokens = {
   n: 1000,
 };
 
-const sections6to8 = spec.slice(spec.indexOf('## 6.'), spec.indexOf('## 9.'));
+// Shell copy (nav labels, aria-labels) lives in spec §3, so the verbatim
+// scope is §3-§8. §7 keeps its own stricter span-level check above.
+const sections3to8 = spec.slice(spec.indexOf('## 3.'), spec.indexOf('## 9.'));
 
 describe('token safety', () => {
   it('finds a non-trivial number of copy strings', () => {
@@ -133,14 +135,14 @@ describe('token safety', () => {
   });
 });
 
-describe('spec sections 6-8 copy is verbatim (full string in spec)', () => {
-  // Each full copy value must appear in spec §6-§8. No normalizations are
+describe('spec sections 3-8 copy is verbatim (full string in spec)', () => {
+  // Each full copy value must appear in spec §3-§8. No normalizations are
   // needed today: even derived strings (batch.footnoteReal, result.rangePrefix,
   // result.reconciliationLabels) are contiguous substrings of spec sentences.
   // If a future string intentionally differs, comment it here and assert its
   // normalized form — do not silently loosen the check.
-  it.each(entries)('%s appears verbatim in spec sections 6-8', (_key, text) => {
-    expect(sections6to8.includes(text)).toBe(true);
+  it.each(entries)('%s appears verbatim in spec sections 3-8', (_key, text) => {
+    expect(sections3to8.includes(text)).toBe(true);
   });
 });
 

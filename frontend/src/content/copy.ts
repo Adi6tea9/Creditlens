@@ -23,6 +23,13 @@ export const placeholderDefaults = {
 } as const;
 
 export const copy = {
+  // ---- 3. Page shell ------------------------------------------------------
+  nav: {
+    home: "Home",
+    primaryNav: "Primary Navigation",
+    toggleMenu: "Toggle menu",
+  },
+
   // ---- 7.1 Global -------------------------------------------------------
   topBanner:
     "Research demo. Not a lending decision. Nothing here is a real score or a real applicant.",

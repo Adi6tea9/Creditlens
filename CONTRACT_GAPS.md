@@ -58,3 +58,30 @@ files were used; no files were moved.
 Verbatim checks assert substring presence in the spec. Short strings
 ("Approve", "Retry", "—", …) match trivially and could match an unrelated
 sentence; the check cannot anchor context without a richer spec format.
+
+## G8. Shell task scope: H1-only pages (owner-approved)
+
+To keep this task shell-only, each page renders just its spec H1 (needed for
+focus/title behaviour). Deferred to the page-content tasks: §6.6 404 card
+wrapper + home link, Home `space-y-10`, all page grids/cards. The 404 title
+`CreditLens — Page not found` is an implementation choice: §3 lists five titles
+but no 404 title.
+
+## G9. Prototype needs network for screenshot fidelity
+
+`docs/ui/creditlens_credit_risk_research_demo.html` loads Tailwind and Google
+Fonts from CDNs. The screenshot tests wait for `networkidle`, but offline CI
+would capture an unstyled prototype. The app itself uses local fonts/CSS and
+no CDN.
+
+## G10. Screenshots not visually reviewed by the agent
+
+The agent cannot view PNG files, so screenshot correctness was verified by
+file existence/size and passing Playwright assertions only. Owner should
+eyeball `frontend/tests/e2e/__screenshots__/shell-{360,768,1280}-pair.png`.
+
+## G11. Playwright browser install
+
+The cached Chromium builds did not match Playwright 1.65.1; `npx playwright
+install chromium` downloaded the required build (browser binary only, no npm
+dependency change). CI must run the same install before e2e tests.
