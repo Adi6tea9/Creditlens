@@ -38,6 +38,16 @@ describe('API client', () => {
     expect(meta.fields).toHaveLength(9);
   });
 
+  it('forwards an abort signal to /meta', async () => {
+    vi.stubEnv('VITE_USE_MOCK', 'false');
+    const controller = new AbortController();
+    const fetchSpy = vi.fn(async () => jsonResponse(await mockMeta()));
+    vi.stubGlobal('fetch', fetchSpy);
+
+    await getMeta(controller.signal);
+    expect(fetchSpy).toHaveBeenCalledWith('/api/meta', { signal: controller.signal });
+  });
+
   it('fails loudly when a real response violates the schema', async () => {
     vi.stubEnv('VITE_USE_MOCK', 'false');
     vi.stubGlobal('fetch', vi.fn(async () => jsonResponse({ model_trained: 'yes' })));

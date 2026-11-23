@@ -3,7 +3,13 @@ import { describe, expect, it } from 'vitest';
 import { postBatch } from '../../src/api/mock';
 import { copy } from '../../src/content/copy';
 import { bandPercentages } from '../../src/lib/bands';
-import { rankedCsv, rankedRows } from '../../src/lib/ranked';
+import {
+  prepareRanking,
+  rankedCounts,
+  rankedCsv,
+  rankedPage,
+  rankedRows,
+} from '../../src/lib/ranked';
 
 describe('ranked batch derivation (spec 6.4)', () => {
   it('uses one bandFor derivation for counts, percentages and bar widths', async () => {
@@ -34,6 +40,37 @@ describe('ranked batch derivation (spec 6.4)', () => {
     for (const row of after) counts[row.band] += 1;
     expect(counts).toEqual({ Approve: 352, Review: 528, Reject: 120 });
     expect(bandPercentages(counts)).toEqual({ Approve: 35.2, Review: 52.8, Reject: 12 });
+  });
+
+  it('keeps a slider update under 16 ms over 100,000 synthetic rows (spec 12.2)', () => {
+    const batch = {
+      is_sample: false,
+      n: 100_000,
+      n_thin: 0,
+      rows: Array.from({ length: 100_000 }, (_, i) => ({
+        id: `R-${String(i).padStart(6, '0')}`,
+        risk: ((i * 37) % 1000) / 10_000,
+        is_thin_file: i % 3 === 0,
+      })),
+    };
+    const prepared = prepareRanking(batch);
+    rankedCounts(prepared, 10, 20);
+    rankedPage(prepared, 10, 20, 0, 50);
+
+    const iterations = 100;
+    let latest = rankedCounts(prepared, 10, 20);
+    const start = performance.now();
+    for (let i = 0; i < iterations; i += 1) {
+      const approve = 5 + (i % 50) / 10;
+      latest = rankedCounts(prepared, approve, 20);
+      rankedPage(prepared, approve, 20, 0, 50);
+    }
+    const perUpdate = (performance.now() - start) / iterations;
+
+    expect(latest.Approve + latest.Review + latest.Reject).toBe(100_000);
+    expect(rankedPage(prepared, 5.5, 20, 0, 50)).toHaveLength(50);
+    console.log(`100k-row slider update: ${perUpdate.toFixed(3)} ms/update`);
+    expect(perUpdate).toBeLessThan(16);
   });
 
   it('writes the full current-cutoff CSV with the exact header and file labels', async () => {

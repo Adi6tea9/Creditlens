@@ -1,4 +1,5 @@
 import type { Config } from 'tailwindcss';
+import colors from 'tailwindcss/colors';
 
 /**
  * CreditLens design tokens — Frontend Master Spec v1.1, sections 4.1–4.5.
@@ -35,7 +36,8 @@ const config: Config = {
         'primary-border': '#99F6E4',
 
         // Caution (amber) — fills, dots and outlines only; never text on white.
-        amber: '#D97706',
+        // Keep the full prototype shade scale; DEFAULT is the spec token.
+        amber: { ...colors.amber, DEFAULT: '#D97706' },
         'amber-bar': '#FCD34D',
         'amber-text': '#B45309',
         'amber-ink': '#92400E',

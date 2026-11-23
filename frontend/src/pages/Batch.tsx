@@ -18,7 +18,13 @@ import { useMeta } from '../hooks/useMeta';
 import { bandPercentages } from '../lib/bands';
 import { downloadCsv, toCsv } from '../lib/csv';
 import { formatCount, formatFixed } from '../lib/format';
-import { rankedCsv, rankedRows } from '../lib/ranked';
+import {
+  prepareRanking,
+  rankedCounts,
+  rankedCsvFor,
+  rankedPage,
+  type PreparedRanking,
+} from '../lib/ranked';
 import { exceedsUploadLimits } from '../lib/upload';
 
 const PAGE_SIZE = 50;
@@ -65,22 +71,21 @@ export default function Batch() {
 
   useEffect(() => setPage(0), [batch]);
 
-  const risksPercent = useMemo(
-    () => (batch ? batch.rows.map((row) => row.risk * 100) : []),
+  const prepared = useMemo<PreparedRanking | undefined>(
+    () => (batch ? prepareRanking(batch) : undefined),
     [batch],
   );
-  const ranked = useMemo(
-    () => (batch ? rankedRows(batch, approve, reject) : []),
-    [batch, approve, reject],
+  const risksPercent = prepared?.risksPercent ?? [];
+  const counts = useMemo(
+    () =>
+      prepared
+        ? rankedCounts(prepared, approve, reject)
+        : { Approve: 0, Review: 0, Reject: 0 },
+    [prepared, approve, reject],
   );
-  const counts = useMemo(() => {
-    const next = { Approve: 0, Review: 0, Reject: 0 };
-    for (const row of ranked) next[row.band] += 1;
-    return next;
-  }, [ranked]);
   const percentages = useMemo(() => bandPercentages(counts), [counts]);
-  const pageRows = ranked.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
-  const pageCount = Math.max(1, Math.ceil(ranked.length / PAGE_SIZE));
+  const pageRows = prepared ? rankedPage(prepared, approve, reject, page * PAGE_SIZE, PAGE_SIZE) : [];
+  const pageCount = Math.max(1, Math.ceil((prepared?.rows.length ?? 0) / PAGE_SIZE));
 
   function changeApprove(value: number) {
     setApprove(value);
@@ -131,7 +136,7 @@ export default function Batch() {
   }
 
   function downloadRanked() {
-    downloadCsv(copy.batch.csvFilename, rankedCsv(ranked));
+    if (prepared) downloadCsv(copy.batch.csvFilename, rankedCsvFor(prepared, approve, reject));
   }
 
   const histogramHelper = batch?.is_sample
@@ -384,9 +389,9 @@ export default function Batch() {
                 </button>
                 <span className="tabular-nums">
                   {fill(copy.batch.showing, {
-                    a: formatCount(ranked.length ? page * PAGE_SIZE + 1 : 0),
-                    b: formatCount(Math.min((page + 1) * PAGE_SIZE, ranked.length)),
-                    n: formatCount(ranked.length),
+                    a: formatCount(prepared?.rows.length ? page * PAGE_SIZE + 1 : 0),
+                    b: formatCount(Math.min((page + 1) * PAGE_SIZE, prepared?.rows.length ?? 0)),
+                    n: formatCount(prepared?.rows.length ?? 0),
                   })}
                 </span>
                 <button

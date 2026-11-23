@@ -64,4 +64,4 @@ The hidden calibration data table originally used `sr-only` on the `<table>` its
 4. Windows OCR returned zero-valued line bounding boxes, so the “no OCR line outside half” check was not usable; overflow conclusions come from DOM assertions and dark-pixel edge analysis instead.
 5. Only the mocked trained fixture was inspected. Real backend latency, partial failures, and live payload anomalies were not exercised.
 6. Hover, focus, keyboard, and animation states are not visible in static pairs; only their static CSS/DOM was checked.
-7. Lint was unavailable in this environment.
+7. Lint is wired as `npm run lint` (TypeScript `tsc --noEmit`); there is no ESLint/Biome config in this repo.

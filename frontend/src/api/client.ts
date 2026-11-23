@@ -60,8 +60,10 @@ async function fromMock<T>(value: Promise<unknown>, parser: Parser<T>): Promise<
   return parser.parse(await value);
 }
 
-export function getMeta(): Promise<Meta> {
-  return useMock() ? fromMock(mock.getMeta(), metaSchema) : request('/meta', metaSchema);
+export function getMeta(signal?: AbortSignal): Promise<Meta> {
+  return useMock()
+    ? fromMock(mock.getMeta(), metaSchema)
+    : request('/meta', metaSchema, signal ? { signal } : undefined);
 }
 
 export function postScore(values: Record<string, number | string>): Promise<Score> {

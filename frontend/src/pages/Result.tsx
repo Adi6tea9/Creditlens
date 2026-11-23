@@ -54,7 +54,7 @@ export default function Result() {
             aria-label={copy.result.estimateEyebrow}
             className="rounded-2xl border border-border/90 bg-surface p-8 shadow-card"
           >
-            <h2 className="text-[11px] font-bold uppercase tracking-wider text-subtle">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-subtle">
               {copy.result.estimateEyebrow}
             </h2>
             <p className="mt-2 text-5xl font-extrabold tracking-tight text-ink tabular-nums">

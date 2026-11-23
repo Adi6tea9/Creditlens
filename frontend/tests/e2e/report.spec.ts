@@ -186,8 +186,17 @@ test.describe('Report (spec 6.5)', () => {
       await expect(page.getByRole('heading', { level: 1, name: copy.report.h1 })).toBeVisible();
       await expect(page.getByText('No model has been trained yet.')).toHaveCount(0);
       await expect(page.getByText(trainedReport.evaluation_note ?? '')).toBeVisible();
+      await expect(
+        page.getByRole('heading', { name: copy.report.performanceTitle }),
+      ).toBeVisible();
+      await expect(page.getByRole('heading', { name: copy.report.fairnessTitle })).toBeVisible();
+      await expect(page.getByText('0.712', { exact: true })).toBeVisible();
+      await expect(page.getByText('Female', { exact: true })).toBeVisible();
       await expect(page.locator('[data-series]')).toHaveCount(3);
       await expect(page.locator('th[scope="rowgroup"]')).toHaveCount(3);
+      const axe = await new AxeBuilder({ page }).analyze();
+      writeFileSync(`${SHOTS}/axe-report-trained-1280.json`, JSON.stringify(axe.violations, null, 2));
+      expect(axe.violations).toEqual([]);
       expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
         1280,
       );
