@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { getMeta, getReport, postBatch, postScore } from '../../src/api/mock';
+import { THIN_FILE_SHORT } from '../../src/config/project';
 
 describe('mock layer', () => {
   it('returns the exact deterministic /score fixture', async () => {
@@ -47,7 +48,7 @@ describe('mock layer', () => {
     expect(new Set(rows.map((row) => row.top_reason)).size).toBe(5);
   });
 
-  it('returns the nine provisional fields and placeholders from /meta', async () => {
+  it('returns the nine provisional fields and config values from /meta', async () => {
     const meta = await getMeta();
     expect(meta.fields).toHaveLength(9);
     expect(meta.loan_types).toEqual([
@@ -59,7 +60,7 @@ describe('mock layer', () => {
       is_sample: true,
       fields_final: false,
       loan_types_final: false,
-      thin_file_short: '[DEFINITION]',
+      thin_file_short: THIN_FILE_SHORT,
       default_approve: 10,
       default_reject: 20,
     });
