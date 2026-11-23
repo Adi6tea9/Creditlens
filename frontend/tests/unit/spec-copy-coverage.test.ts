@@ -3,7 +3,11 @@ import { resolve } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
-import { intentionallyAbsent, nonCopyPatterns } from '../spec-copy-allowlist';
+import {
+  intentionallyAbsent,
+  nonCopyPatterns,
+  specDefinedTemplates,
+} from '../spec-copy-allowlist';
 
 // Vitest runs with cwd = frontend/.
 const spec = readFileSync(resolve(process.cwd(), '../docs/FRONTEND_MASTER_SPEC.md'), 'utf8');
@@ -24,6 +28,7 @@ const isCopyCandidate = (text: string): boolean =>
 
 const candidates = spans.filter(isCopyCandidate);
 const allowlisted = new Set<string>(intentionallyAbsent.map((entry) => entry.spec));
+const specDefined = new Set<string>(specDefinedTemplates);
 
 describe('spec sections 6-8 user-facing strings all exist in copy.ts', () => {
   it('extracts a non-trivial set of spec strings', () => {
@@ -31,9 +36,22 @@ describe('spec sections 6-8 user-facing strings all exist in copy.ts', () => {
     expect(candidates.length).toBeGreaterThan(100);
   });
 
-  it('fails for any spec string missing from copy.ts and the allowlist', () => {
-    const missing = candidates.filter((text) => !copySource.includes(text) && !allowlisted.has(text));
+  it('fails for any spec string missing from copy.ts, allowlist and template assertions', () => {
+    const missing = candidates.filter(
+      (text) => !copySource.includes(text) && !allowlisted.has(text) && !specDefined.has(text),
+    );
     expect(missing).toEqual([]);
+  });
+
+  it.each(specDefinedTemplates)('spec defines template wording verbatim: %s', (text) => {
+    expect(scope.includes(`\`${text}\``)).toBe(true);
+  });
+
+  it('asserts spec-defined templates instead of allowlisting them', () => {
+    const duplicated = intentionallyAbsent
+      .filter((entry) => specDefined.has(entry.spec))
+      .map((entry) => entry.spec);
+    expect(duplicated).toEqual([]);
   });
 
   it('does not allowlist strings absent from the spec', () => {

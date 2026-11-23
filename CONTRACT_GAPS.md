@@ -20,15 +20,18 @@ approve adding a linter in a later task.
 
 ## G4. Placeholder values supplied; release check guards the rest (spec §11)
 
-- `REPO_URL` = `[REAL URL]` — the literal the owner supplied. It is non-empty
-  and has no angle brackets, so the check passes, but it is still not a
-  resolvable URL. Owner must replace it before release.
+- `REPO_URL` = `https://github.com/Adi6tea9/Creditlens` — taken from
+  `git remote -v` and approved by the owner; the footer link now resolves.
 - `THIN_FILE_DEFINITION` / `THIN_FILE_SHORT` — now hold the owner's text;
   `/meta` still overrides them at runtime.
 - `npm run check:placeholders` still greps `src/` and built assets for the old
   section 11 tokens and `is_sample` mock labels in production config, and now
-  also fails if any of the three config values is empty or contains `<` or `>`.
-  It exits 0 only when no finding remains. Do not weaken it.
+  fails on empty config values or a `REPO_URL` that does not start with
+  `https://github.com/`, lacks an owner and repo segment, or contains brackets,
+  spaces or the words "your", "real", "repo-name". It exits 0 only when no
+  finding remains. Do not weaken it.
+- Spec §11 still lists the old `[REAL URL]` token; it was left unchanged by
+  instruction and needs an owner update.
 
 ## G5. fill() leaves unknown tokens untouched (proposal, not implemented)
 

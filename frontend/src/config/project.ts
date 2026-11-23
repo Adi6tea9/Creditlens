@@ -6,7 +6,7 @@
 
 export const PRODUCT_NAME = 'CreditLens';
 
-export const REPO_URL = '[REAL URL]';
+export const REPO_URL = 'https://github.com/Adi6tea9/Creditlens';
 
 export const THIN_FILE_DEFINITION =
   'A thin-file borrower has little or no formal credit history, such as few or no past loans or bureau records, so traditional scores have little to go on.';

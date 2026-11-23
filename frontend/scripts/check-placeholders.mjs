@@ -2,8 +2,9 @@
 /**
  * Spec 12.4 — release check.
  * Greps src/ and built assets for the old section 11 placeholders, checks
- * production config for hard-coded mock labels, and rejects empty or
- * angle-bracketed config values. Exits non-zero if any finding remains.
+ * production config for hard-coded mock labels, and rejects empty config
+ * values or a REPO_URL that is not a real GitHub owner/repo URL. Exits
+ * non-zero if any finding remains.
  */
 
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';

@@ -525,7 +525,7 @@ Component: Score form validation; Report dashes when `model_trained` is false; `
 E2E (Playwright, mock mode): home → score → result; batch slider changes counts, bar, table pills and histogram together; report shows dashes; axe has **0 violations** on all five pages at 360 and 1280 width.
 
 ### 12.4 Release check
-`npm run check:placeholders` greps `src/` and built assets for `[YOUR REPO LINK]`, `[DEFINITION`, and `is_sample` mock labels in production config, and **exits non-zero** if any remain. CI runs it on release builds only; dev builds may pass with placeholders.
+Three checks run under `frontend/`. `npm run check:placeholders` greps `src/` and built assets for `[YOUR REPO LINK]`, `[DEFINITION`, and `is_sample` mock labels in production config, rejects empty config values and requires `REPO_URL` to start with `https://github.com/`, have an owner and a repo segment, and contain no brackets, spaces or the words "your", "real", "repo-name"; it **exits non-zero** on any finding. The verbatim checks in `npm test` require every `copy.ts` string to appear in sections 3–8 and every section 7 backtick span (except `/meta` paths) to appear in `copy.ts`. The coverage test extracts section 6–8 backtick spans that start with a capital, or lower-case sentences containing a period, filters CSS/path/code patterns, and fails if a remaining string is missing from `copy.ts`, its explicit allowlist, or the spec-defined template assertions. CI runs the release check on release builds only; dev builds may pass with placeholders.
 
 ### 12.5 Definition of done
 1. All five routes match sections 3–6 at 360 / 768 / 1280 px.

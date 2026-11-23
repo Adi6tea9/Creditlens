@@ -51,6 +51,30 @@ describe('release guard for section 11 values', () => {
     );
   });
 
+  it('rejects [REAL URL] for REPO_URL', () => {
+    const source = configSource.replace(REPO_URL, '[REAL URL]');
+    const issues = invalidPlaceholderValues(readPlaceholderValues(source));
+    expect(issues).toContain('REPO_URL must start with https://github.com/');
+    expect(issues).toContain('REPO_URL must not contain brackets, spaces or placeholder words');
+  });
+
+  it('rejects <your-username> for REPO_URL', () => {
+    const source = configSource.replace(REPO_URL, '<your-username>');
+    expect(invalidPlaceholderValues(readPlaceholderValues(source)).length).toBeGreaterThan(0);
+  });
+
+  it('rejects an empty REPO_URL', () => {
+    const source = configSource.replace(REPO_URL, '');
+    expect(invalidPlaceholderValues(readPlaceholderValues(source))).toContain(
+      'REPO_URL is missing or empty',
+    );
+  });
+
+  it('accepts a valid GitHub URL for REPO_URL', () => {
+    const source = configSource.replace(REPO_URL, 'https://github.com/octocat/Hello-World');
+    expect(invalidPlaceholderValues(readPlaceholderValues(source))).toEqual([]);
+  });
+
   it('accepts the current project values', () => {
     expect(invalidPlaceholderValues(readPlaceholderValues(configSource))).toEqual([]);
   });
