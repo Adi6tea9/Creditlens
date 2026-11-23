@@ -81,3 +81,91 @@ describe('placeholders are filled, never retyped', () => {
     expect(fill(copy.batch.showing, { a: 1, b: 50, n: 1000 })).toBe('Showing 1–50 of 1000');
   });
 });
+
+// ---- Hardening: token safety, §6/§8 verbatim, forbidden wording ----------
+
+/** Every leaf string in copy, with its dot path (e.g. score.getBack.1). */
+function stringEntries(value: unknown, prefix = ''): Array<[string, string]> {
+  if (typeof value === 'string') return [[prefix, value]];
+  if (Array.isArray(value)) {
+    return value.flatMap((item, i) => stringEntries(item, `${prefix}.${i}`));
+  }
+  if (value !== null && typeof value === 'object') {
+    return Object.entries(value).flatMap(([key, item]) =>
+      stringEntries(item, prefix ? `${prefix}.${key}` : key),
+    );
+  }
+  return [];
+}
+
+const entries = stringEntries(copy);
+
+// Complete token set: the three config/meta placeholders plus every runtime
+// token the spec's templates use (§6.4 KPI subs, pagination).
+const completeTokens = {
+  ...placeholderDefaults,
+  n_thin: 312,
+  pct: 31.2,
+  a: 1,
+  b: 50,
+  n: 1000,
+};
+
+const sections6to8 = spec.slice(spec.indexOf('## 6.'), spec.indexOf('## 9.'));
+
+describe('token safety', () => {
+  it('finds a non-trivial number of copy strings', () => {
+    expect(entries.length).toBeGreaterThan(100);
+  });
+
+  it.each(entries)('fill() leaves no {token} behind: %s', (_key, text) => {
+    expect(fill(text, completeTokens)).not.toMatch(/\{\w+\}/);
+  });
+
+  it('every {token} used in copy is a key of the accepted token set', () => {
+    const allowed = new Set(Object.keys(completeTokens));
+    const offenders = entries.flatMap(([key, text]) =>
+      [...text.matchAll(/\{(\w+)\}/g)]
+        .filter((match) => !allowed.has(match[1]))
+        .map((match) => `${key}: {${match[1]}}`),
+    );
+    expect(offenders).toEqual([]);
+  });
+});
+
+describe('spec sections 6-8 copy is verbatim (full string in spec)', () => {
+  // Each full copy value must appear in spec §6-§8. No normalizations are
+  // needed today: even derived strings (batch.footnoteReal, result.rangePrefix,
+  // result.reconciliationLabels) are contiguous substrings of spec sentences.
+  // If a future string intentionally differs, comment it here and assert its
+  // normalized form — do not silently loosen the check.
+  it.each(entries)('%s appears verbatim in spec sections 6-8', (_key, text) => {
+    expect(sections6to8.includes(text)).toBe(true);
+  });
+});
+
+describe('forbidden wording', () => {
+  // Owner-approved documented exception (see CONTRACT_GAPS.md): spec §7.3
+  // mandates this exact string, and the §7 verbatim test requires it.
+  // Flagged, not reworded. Remove this entry only when the spec changes.
+  const documentedExceptions = new Set(['score.getBack.1']);
+
+  const hits = entries.filter(([, text]) => /80\s?%|confidence/i.test(text));
+
+  it('flags every hit by key (reported, never auto-fixed)', () => {
+    // Kept as an assertion so the hit list stays visible and current.
+    expect(hits.map(([key]) => key)).toEqual(['score.getBack.1']);
+  });
+
+  it('has no forbidden wording beyond the documented exceptions', () => {
+    const unexpected = hits.filter(([key]) => !documentedExceptions.has(key));
+    expect(unexpected).toEqual([]);
+  });
+
+  it('keeps the exception list honest (no stale entries)', () => {
+    const hitKeys = new Set(hits.map(([key]) => key));
+    for (const key of documentedExceptions) {
+      expect(hitKeys.has(key)).toBe(true);
+    }
+  });
+});

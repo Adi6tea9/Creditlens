@@ -104,6 +104,8 @@ export const copy = {
     whatYouGetBack: "What you get back",
     getBack: [
       "An estimated chance of repayment difficulty",
+      // Contains "confidence" — spec §7.3 mandates it verbatim; flagged as a
+      // documented exception in copy.test.ts and CONTRACT_GAPS.md (G1).
       "Whether the applicant counts as thin-file, and how that affects confidence",
       "The inputs that pushed the estimate up or down",
     ],
